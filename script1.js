@@ -1,3 +1,4 @@
+// const obfuscatedKey = "ODJlMjlhOGIzZjg0OGEyOGU3MWI0ZDU0ZWJlYTYzYg=="; // Base64 encoded API key
 const API_KEY = "182e29a8b3f848a28e71b4d54ebea63b";
 const url = "https://newsapi.org/v2/everything?q=";
 let page = 1;
