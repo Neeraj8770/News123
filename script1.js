@@ -1,9 +1,8 @@
-// const obfuscatedKey = "ODJlMjlhOGIzZjg0OGEyOGU3MWI0ZDU0ZWJlYTYzYg=="; // Base64 encoded API key
 const API_KEY = "182e29a8b3f848a28e71b4d54ebea63b";
 const url = "https://newsapi.org/v2/everything?q=";
-let page = 1;
-let totalResults = 0;
-let query = "India";
+let page = 1; // Initial page number
+let totalResults = 0; // Total number of articles
+let query = "India"; // Initial query
 
 window.addEventListener("load", () => fetchNews(query));
 
@@ -12,15 +11,22 @@ function reload() {
 }
 
 async function fetchNews(query, page = 1) {
-  const res = await fetch(`${url}${query}&apiKey=${API_KEY}&page=${page}`);
-  const data = await res.json();
-  totalResults = data.totalResults;
-  bindData(data.articles);
+  try {
+    const res = await fetch(`${url}${query}&apiKey=${API_KEY}&page=${page}`);
+    const data = await res.json();
+    totalResults = data.totalResults;
+    bindData(data.articles);
+  } catch (error) {
+    console.error("Error fetching news:", error);
+  }
 }
 
 function bindData(articles) {
   const cardsContainer = document.getElementById("cards-container");
   const newsCardTemplate = document.getElementById("template-news-card");
+
+  // Clear existing content if any
+  cardsContainer.innerHTML = "";
 
   articles.forEach((article) => {
     if (!article.urlToImage) return;
@@ -46,16 +52,18 @@ function fillDataInCard(cardClone, article) {
 
   newsSource.innerHTML = `${article.source.name} · ${date}`;
 
+  // Open article in a new tab when card is clicked
   cardClone.firstElementChild.addEventListener("click", () => {
     window.open(article.url, "_blank");
   });
 }
 
 let curSelectedNav = null;
+
 function onNavItemClick(id) {
-  query = id;
+  query = id; // Update query based on category clicked
   page = 1; // Reset page number when a new category is selected
-  fetchNews(query, page);
+  fetchNews(query, page); // Fetch news based on new query and page 1
   const navItem = document.getElementById(id);
   curSelectedNav?.classList.remove("active");
   curSelectedNav = navItem;
@@ -66,18 +74,20 @@ const searchButton = document.getElementById("search-button");
 const searchText = document.getElementById("search-text");
 
 searchButton.addEventListener("click", () => {
-  query = searchText.value;
-  if (!query) return;
-  page = 2; // Reset page number when a new search is made
-  fetchNews(query, page);
-  curSelectedNav?.classList.remove("active");
-  curSelectedNav = null;
+  const query = searchText.value.trim();
+  if (query) {
+    page = 1; // Reset page number when a new search is made
+    fetchNews(query, page);
+    curSelectedNav?.classList.remove("active");
+    curSelectedNav = null;
+  }
 });
 
 window.addEventListener("scroll", () => {
+  // Load more news when scroll nears the bottom and there are more articles to fetch
   if (
     window.innerHeight + window.scrollY >= document.body.offsetHeight - 1000 &&
-    page * 30 < totalResults
+    page * 20 < totalResults
   ) {
     page++;
     fetchNews(query, page);
